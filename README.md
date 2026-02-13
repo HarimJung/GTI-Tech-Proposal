@@ -60,4 +60,53 @@ The GTI consultancy requires:
 
 ## System Architecture
 
-┌─────────────────────────────────────────────────────────────────┐ │ GTI 2026 SYSTEM ARCHITECTURE │ ├─────────────────────────────────────────────────────────────────┤ │ │ │ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │ │ │ SurveyMonkey │ │ Excel/CSV │ │ JSON API │ │ │ │ CSV Export │ │ Partners │ │ (future) │ │ │ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ │ │ │ │ │ │ │ └───────────┬───────┴───────────────────┘ │ │ ▼ │ │ ┌─────────────────────────────────────────────────────┐ │ │ │ R SCORING PIPELINE │ │ │ │ │ │ │ │ batch_ingest() → 80+ partner files │ │ │ │ ↓ │ │ │ │ validate_survey() → QA report + cleaned data │ │ │ │ ↓ │ │ │ │ score_pillar() → per-pillar weighted average │ │ │ │ ↓ Σ(wᵢ×xᵢ)/Σ(wᵢ)×100 − penalty │ │ │ │ score_all() → 7 pillars × N countries │ │ │ │ ↓ │ │ │ │ ┌────────────┬────────────┬─────────────┐ │ │ │ │ │ JSON │ Excel │ Factsheets │ │ │ │ │ │ (dashboard)│ (OMCT) │ (per-country)│ │ │ │ │ └─────┬──────┴────────────┴─────────────┘ │ │ │ └────────┼────────────────────────────────────────────┘ │ │ ▼ │ │ ┌─────────────────────────────────────────────────────┐ │ │ │ REACT + D3.js DASHBOARD │ │ │ │ │ │ │ │ ┌───────────────────────────────────────────┐ │ │ │ │ │ Tab 1: Methodology Architecture │ │ │ │ │ │ - Pipeline flow diagram │ │ │ │ │ │ - 7 pillar cards with indicator counts │ │ │ │ │ │ - Scoring formula + weight explanation │ │ │ │ │ │ - Experience match matrix │ │ │ │ │ └───────────────────────────────────────────┘ │ │ │ │ ┌───────────────────────────────────────────┐ │ │ │ │ │ Tab 2: Interactive Global Index │ │ │ │ │ │ - D3 choropleth world map (27 countries) │ │ │ │ │ │ - Country ranking cards │ │ │ │ │ │ - Pillar-by-country heatmap (SVG) │ │ │ │ │ │ - Year-on-year trend sparklines │ │ │ │ │ │ - Country detail: radar + bar charts │ │ │ │ │ └───────────────────────────────────────────┘ │ │ │ └─────────────────────────────────────────────────────┘ │ │ │ │ Data flow: R ──JSON──▶ Dashboard ──render──▶ Browser │ │ Upload: User can drag-drop R JSON to switch from demo │ │ │ └─────────────────────────────────────────────────────────────────┘
+flowchart TB
+    subgraph INPUT["📥 Data Sources"]
+        A["SurveyMonkey\nCSV Export"]
+        B["Excel / CSV\nPartners"]
+        C["JSON API\n(future)"]
+    end
+
+    subgraph PIPELINE["⚙️ R Scoring Pipeline"]
+        direction TB
+        D["batch_ingest()\n80+ partner files"]
+        E["validate_survey()\nQA report + cleaned data"]
+        F["score_pillar()\nper-pillar weighted average\n<i>Σ(wᵢ × xᵢ) / Σ(wᵢ) × 100 − penalty</i>"]
+        G["score_all()\n7 pillars × N countries"]
+
+        D --> E --> F --> G
+    end
+
+    subgraph OUTPUT["📦 Outputs"]
+        H["JSON\n(dashboard)"]
+        I["Excel\n(OMCT)"]
+        J["Factsheets\n(per-country)"]
+    end
+
+    subgraph DASHBOARD["🖥️ React + D3.js Dashboard"]
+        direction TB
+        subgraph TAB1["Tab 1 · Methodology Architecture"]
+            K1["Pipeline flow diagram"]
+            K2["7 pillar cards with indicator counts"]
+            K3["Scoring formula + weight explanation"]
+            K4["Experience match matrix"]
+        end
+        subgraph TAB2["Tab 2 · Interactive Global Index"]
+            L1["D3 choropleth world map (27 countries)"]
+            L2["Country ranking cards"]
+            L3["Pillar-by-country heatmap (SVG)"]
+            L4["Year-on-year trend sparklines"]
+            L5["Country detail: radar + bar charts"]
+        end
+    end
+
+    A & B & C --> D
+    G --> H & I & J
+    H --> DASHBOARD
+
+    style INPUT fill:#e8f4fd,stroke:#2196F3,color:#000
+    style PIPELINE fill:#fff3e0,stroke:#FF9800,color:#000
+    style OUTPUT fill:#e8f5e9,stroke:#4CAF50,color:#000
+    style DASHBOARD fill:#f3e5f5,stroke:#9C27B0,color:#000
+    style TAB1 fill:#fce4ec,stroke:#E91E63,color:#000
+    style TAB2 fill:#e0f2f1,stroke:#009688,color:#000
