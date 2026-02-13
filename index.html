@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GTI 2026 – Methodology Architecture | Harim Jung</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://d3js.org/topojson.v3.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+  
+  :root {
+    --omct-red: #ce2029;
+    --omct-black: #111111;
+    --omct-dark: #1a1a1a;
+    --omct-grey: #f4f4f4;
+    --omct-border: #e0e0e0;
+    --omct-white: #ffffff;
+    --omct-green: #009ca6; /* Donate button teal */
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  body {
+    font-family:'Inter',sans-serif;
+    background: var(--omct-white);
+    color: var(--omct-black);
+    overflow-x:hidden;
+    line-height: 1.5;
+  }
+
+  a { text-decoration: none; color: inherit; }
+
+  /* Main Tab Navigation */
+  .main-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #1e1e2e;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0;
+  }
+  .main-tab-btn {
+    background: transparent;
+    border: none;
+    color: #666;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    border-radius: 20px;
+    transition: all 0.2s;
+  }
+  .main-tab-btn:hover {
+    color: #e0e0e0;
+    background: #1e1e2e;
+  }
+  .main-tab-btn.active {
+    background: linear-gradient(135deg,#ff6b35,#f7c948);
+    color: #0a0a0f;
+    font-weight: 700;
+  }
+
+  /* UTILITY */
+  .container {
+    max-width:1400px;
+    margin:0 auto;
+    padding:0 40px;
+  }
+  .full-width {
+    width: 100%;
+  }
+
+  /* BRAND HEADER */
+  .brand-header {
+    background: var(--omct-white);
+    border-bottom: 1px solid var(--omct-border);
+    padding: 20px 0;
+  }
+  .brand-nav-top {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .donate-btn {
+    background: var(--omct-green);
+    color: white;
+    padding: 8px 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+  .brand-main-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .brand-logo {
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .brand-logo span { color: var(--omct-red); }
+  .brand-logo .sub { font-size: 12px; font-weight: 500; color: #666; letter-spacing: 0; display: block; margin-top: 4px; }
+
+  /* APP NAVIGATION */
+  .app-nav {
+    display: flex;
+    gap: 30px;
+  }
+  .app-nav-btn {
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding-bottom: 4px;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    color: var(--omct-black);
+  }
+  .app-nav-btn:hover { color: var(--omct-red); }
+  .app-nav-btn.active { border-bottom-color: var(--omct-red); color: var(--omct-red); }
+
+  /* PAGE HEADER (Hero) */
+  .page-header {
+    background: var(--omct-grey);
+    padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-content {
+    max-width: 800px;
+  }
+  .badge-red {
+    display: inline-block;
+    background: var(--omct-red);
+    color: white;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    margin-bottom: 20px;
+  }
+  .hero-title {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1.1;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: #444;
+    max-width: 600px;
+    margin-bottom: 30px;
+  }
+  .read-more-btn {
+    display: inline-block;
+    border: 2px solid var(--omct-black);
+    padding: 10px 24px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    background: transparent;
+    cursor: pointer;
+    color: var(--omct-black);
+  }
+  .read-more-btn:hover {
+    background: var(--omct-black);
+    color: white;
+  }
+
+  /* SECTIONS */
+  .section-container {
+    padding: 80px 0;
+  }
+  .section-title {
+    font-size: 32px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 40px;
+    border-left: 10px solid var(--omct-red);
+    padding-left: 20px;
+    line-height: 1;
+  }
+
+  /* RED STATS SECTION */
+  .red-section {
+    background: var(--omct-red);
+    color: white;
+    padding: 80px 0;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 40px;
+  }
+  .stat-card {
+    text-align: left;
+  }
+  .stat-card .num {
+    font-size: 42px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+  .stat-card .label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    opacity: 0.9;
+    border-top: 2px solid rgba(255,255,255,0.3);
+    padding-top: 10px;
+  }
+
+  /* CARDS (Pipeline/Pillars) */
+  .card-grid {
+    display: flex;
+    gap: 0;
+    border: 1px solid #ddd;
+    margin-bottom: 60px;
+  }
+  .grid-cols-7 {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 20px;
+  }
+  .grid-cols-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  
+  .pipeline-card {
+    flex: 1;
+    padding: 30px;
+    border-right: 1px solid #ddd;
+    background: white;
+    position: relative;
+  }
+  .pipeline-card:last-child { border-right: none; }
+  .pipeline-card:hover { background: #fafafa; }
+  .pipeline-card .num-badge {
+    background: var(--omct-black);
+    color: white;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .pipeline-card h3 {
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .pipeline-card p {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 16px;
+  }
+  .tag {
+    display: inline-block;
+    background: #eee;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-right: 4px;
+    color: #333;
+  }
+
+  .pillar-card {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .pillar-card:hover {
+    border-color: var(--omct-red);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  }
+  .pillar-card .icon { font-size: 32px; margin-bottom: 16px; }
+  .pillar-card h4 {
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    min-height: 32px;
+  }
+  .pillar-card .count {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--omct-red);
+  }
+
+  /* FORMULA SECTION */
+  .formula-block {
+    background: var(--omct-black);
+    color: white;
+    padding: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .formula-text h3 { font-size: 24px; font-weight: 800; margin-bottom: 20px; }
+  .formula-display {
+    font-family: 'Courier New', monospace;
+    border: 1px solid #444;
+    padding: 30px;
+    background: #111;
+  }
+
+  /* DASHBOARD HEADER & SCROLL */
+  .sticky-dash-header {
+    position: sticky;
+    top: 55px; /* Offset for main-tabs */
+    z-index: 900;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #ddd;
+    padding: 15px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  }
+  
+  .scroll-section {
+    scroll-margin-top: 150px;
+    padding-top: 40px;
+    padding-bottom: 80px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  /* DASHBOARD MAP STYLES */
+  #world-map {
+    width: 100%;
+    height: 600px;
+    background: #eef2f5; /* Light map bg */
+    border: 1px solid #ddd;
+    position: relative;
+    overflow: hidden;
+  }
+  .map-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #444;
+  }
+  .legend-dot { width: 12px; height: 12px; }
+
+  /* TOOLTIP (Light Mode) */
+  .tooltip {
+    position:absolute;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 16px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 200;
+    min-width: 220px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .tooltip .tt-country { font-size: 16px; font-weight: 800; color: var(--omct-black); margin-bottom: 4px; text-transform: uppercase;}
+  .tooltip .tt-score { font-size: 24px; font-weight: 900; margin-bottom: 2px; }
+  .tooltip .tt-risk { font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+  .tooltip .tt-pillar { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px; border-bottom: 1px solid #eee; padding-bottom: 2px;}
+
+  /* COUNTRY GRID */
+  .country-card {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .country-card:hover {
+    border-color: var(--omct-red);
+    background: #fafafa;
+  }
+  .country-card .cc-name {
+    font-size: 14px; font-weight: 800; color: var(--omct-black); margin-bottom: 4px; text-transform: uppercase;
+  }
+  .country-card .cc-score { font-size: 32px; font-weight: 900; line-height: 1; }
+  .country-card .cc-risk { font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+  
+  /* DETAIL VIEW */
+  .detail-header {
+    background: var(--omct-grey);
+    padding: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+  }
+  .detail-header h2 { font-size: 36px; font-weight: 900; text-transform: uppercase; }
+  .back-btn {
+    border: 2px solid var(--omct-black);
+    background: transparent;
+    padding: 10px 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .back-btn:hover { background: var(--omct-black); color: white; }
+  
+  .detail-content { padding: 40px 0; }
+  .detail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+  .chart-box {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 30px;
+  }
+  .chart-box h3 { font-size: 14px; font-weight: 800; text-transform: uppercase; margin-bottom: 20px; color: var(--omct-red); }
+
+  /* FOOTER */
+  .footer {
+    background: var(--omct-black);
+    color: white;
+    padding: 60px 0;
+    text-align: center;
+  }
+  .footer a { color: var(--omct-red); font-weight: 700; }
+
+  /* ANIMATIONS */
+  @keyframes fadeInUp {
+    from { opacity:0; transform:translateY(20px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .animate { animation: fadeInUp 0.6s ease forwards; opacity:0; }
+  .d1{animation-delay:0.1s} .d2{animation-delay:0.2s}
+  .d3{animation-delay:0.3s} .d4{animation-delay:0.4s}
+
+  @media(max-width:900px){
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .grid-cols-7{grid-template-columns:repeat(2,1fr);}
+    .card-grid{flex-direction:column;}
+    .pipeline-card{border-right:none;border-bottom:1px solid #ddd;}
+    .formula-block{grid-template-columns:1fr;}
+    .detail-row{grid-template-columns:1fr;}
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="./index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
