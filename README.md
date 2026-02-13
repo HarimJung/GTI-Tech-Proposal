@@ -60,53 +60,54 @@ The GTI consultancy requires:
 
 ## System Architecture
 
+## System Architecture
+
+```mermaid
 flowchart TB
-    subgraph INPUT["📥 Data Sources"]
-        A["SurveyMonkey\nCSV Export"]
-        B["Excel / CSV\nPartners"]
-        C["JSON API\n(future)"]
-    end
+    A["SurveyMonkey CSV Export"] --> D
+    B["Excel / CSV Partners"] --> D
+    C["JSON API (future)"] --> D
 
-    subgraph PIPELINE["⚙️ R Scoring Pipeline"]
+    subgraph PIPELINE["R Scoring Pipeline"]
         direction TB
-        D["batch_ingest()\n80+ partner files"]
-        E["validate_survey()\nQA report + cleaned data"]
-        F["score_pillar()\nper-pillar weighted average\n<i>Σ(wᵢ × xᵢ) / Σ(wᵢ) × 100 − penalty</i>"]
-        G["score_all()\n7 pillars × N countries"]
-
+        D["batch_ingest() → 80+ partner files"]
+        E["validate_survey() → QA report + cleaned data"]
+        F["score_pillar() → weighted average"]
+        G["score_all() → 7 pillars × N countries"]
         D --> E --> F --> G
     end
 
-    subgraph OUTPUT["📦 Outputs"]
-        H["JSON\n(dashboard)"]
-        I["Excel\n(OMCT)"]
-        J["Factsheets\n(per-country)"]
-    end
+    G --> H["JSON (dashboard)"]
+    G --> I["Excel (OMCT)"]
+    G --> J["Factsheets (per-country)"]
 
-    subgraph DASHBOARD["🖥️ React + D3.js Dashboard"]
+    H --> DASH
+
+    subgraph DASH["React + D3.js Dashboard"]
         direction TB
-        subgraph TAB1["Tab 1 · Methodology Architecture"]
-            K1["Pipeline flow diagram"]
-            K2["7 pillar cards with indicator counts"]
-            K3["Scoring formula + weight explanation"]
-            K4["Experience match matrix"]
+        subgraph T1["Tab 1 : Methodology"]
+            M1["Pipeline flow diagram"]
+            M2["7 pillar cards"]
+            M3["Scoring formula + weights"]
+            M4["Experience match matrix"]
         end
-        subgraph TAB2["Tab 2 · Interactive Global Index"]
-            L1["D3 choropleth world map (27 countries)"]
-            L2["Country ranking cards"]
-            L3["Pillar-by-country heatmap (SVG)"]
-            L4["Year-on-year trend sparklines"]
-            L5["Country detail: radar + bar charts"]
+        subgraph T2["Tab 2 : Interactive Global Index"]
+            N1["D3 choropleth map — 27 countries"]
+            N2["Country ranking cards"]
+            N3["Pillar-by-country heatmap"]
+            N4["Year-on-year sparklines"]
+            N5["Country detail: radar + bar"]
         end
     end
 
-    A & B & C --> D
-    G --> H & I & J
-    H --> DASHBOARD
+    style PIPELINE fill:#fff3e0,stroke:#ef8e01,stroke-width:2px,color:#000
+    style DASH fill:#e8f4fd,stroke:#1a84c7,stroke-width:2px,color:#000
+    style T1 fill:#fce4ec,stroke:#d44a6a,stroke-width:1px,color:#000
+    style T2 fill:#e0f2f1,stroke:#00897b,stroke-width:1px,color:#000
+```
 
-    style INPUT fill:#e8f4fd,stroke:#2196F3,color:#000
-    style PIPELINE fill:#fff3e0,stroke:#FF9800,color:#000
-    style OUTPUT fill:#e8f5e9,stroke:#4CAF50,color:#000
-    style DASHBOARD fill:#f3e5f5,stroke:#9C27B0,color:#000
-    style TAB1 fill:#fce4ec,stroke:#E91E63,color:#000
-    style TAB2 fill:#e0f2f1,stroke:#009688,color:#000
+> **Scoring formula** — `Σ(wᵢ × xᵢ) / Σ(wᵢ) × 100 − penalty`
+>
+> **Data flow** — R → JSON → Dashboard → Browser
+>
+> **Upload** — drag-drop R JSON to switch from demo data
