@@ -58,7 +58,6 @@ The GTI consultancy requires:
 
 ---
 
-## System Architecture
 
 ## System Architecture
 
